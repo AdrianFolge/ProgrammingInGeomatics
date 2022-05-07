@@ -1,15 +1,22 @@
-import { Box } from "@chakra-ui/react";
+import {
+  Box,
+  Text,
+  Heading,
+  HStack,
+  Switch,
+  useBoolean,
+} from "@chakra-ui/react";
 import { HeatmapLayer, HexagonLayer } from "@deck.gl/aggregation-layers";
 import { ScatterplotLayer } from "@deck.gl/layers";
 import DeckGL from "@deck.gl/react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import StaticMap from "react-map-gl";
 // Viewport settings
 const INITIAL_VIEW_STATE = {
   longitude: -0.118092,
   latitude: 51.509865,
-  zoom: 13,
-  pitch: 0,
+  zoom: 10,
+  pitch: 45,
   bearing: 0,
 };
 export interface Store {
@@ -32,6 +39,9 @@ export interface Store {
 }
 
 const Index = () => {
+  const [heatmapActive, { toggle: toggleHeatmapActive }] = useBoolean(false);
+  const [scatterActive, { toggle: toggleScatterActive }] = useBoolean(false);
+  const [hexagonActive, { toggle: toggleHexagonActive }] = useBoolean(true);
   const hexagon = new HexagonLayer<Store>({
     id: "starbucks-heat",
     data: "starbucks.json",
@@ -54,25 +64,58 @@ const Index = () => {
     onClick: ({ object }) => alert(object.streetAddressLine1),
     getPosition: (d) => [d.longitude, d.latitude],
     radiusMinPixels: 10,
-    getFillColor: () => [0, 112, 74],
+    getFillColor: () => [255, 0, 0],
   });
-  const [layers, setLayers] = useState([heatmap, scatter, hexagon]);
+
+  const layers = useMemo(() => {
+    const newLayers: any[] = [];
+    if (scatterActive) newLayers.push(scatter);
+    if (heatmapActive) newLayers.push(heatmap);
+    if (hexagonActive) newLayers.push(hexagon);
+    return newLayers;
+  }, [scatter, scatterActive, heatmapActive, hexagonActive, hexagon, heatmap]);
+
   return (
-    <Box h="100vh" w="100vh">
-      <DeckGL
-        onViewStateChange={(e) =>
-          setLayers(e.viewState.zoom > 13 ? [scatter] : [heatmap, hexagon])
-        }
-        controller={true}
-        initialViewState={INITIAL_VIEW_STATE}
-        layers={layers}
+    <>
+      <HStack
+        justify="space-between"
+        bg="gray.100"
+        p="2"
+        position="fixed"
+        top="0"
+        w="full"
+        left="0"
+        zIndex={5}
       >
-        <StaticMap
-          mapStyle="mapbox://styles/mapbox/navigation-night-v1"
-          mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
-        />
-      </DeckGL>
-    </Box>
+        <Heading>Starbuckses of the World</Heading>
+        <HStack>
+          <HStack>
+            <Text>Scatter:</Text>
+            <Switch isChecked={scatterActive} onChange={toggleScatterActive} />
+          </HStack>
+          <HStack>
+            <Text>Heatmap:</Text>
+            <Switch isChecked={heatmapActive} onChange={toggleHeatmapActive} />
+          </HStack>
+          <HStack>
+            <Text>Hexagons:</Text>
+            <Switch isChecked={hexagonActive} onChange={toggleHexagonActive} />
+          </HStack>
+        </HStack>
+      </HStack>
+      <Box h="100vh">
+        <DeckGL
+          controller={true}
+          initialViewState={INITIAL_VIEW_STATE}
+          layers={layers}
+        >
+          <StaticMap
+            mapStyle="mapbox://styles/mapbox/navigation-night-v1"
+            mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
+          />
+        </DeckGL>
+      </Box>
+    </>
   );
 };
 
