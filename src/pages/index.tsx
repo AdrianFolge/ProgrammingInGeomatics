@@ -90,7 +90,7 @@ const Index = () => {
         zIndex={5}
       >
         <Heading>Starbuckses of the World</Heading>
-        <HStack>
+        <HStack spacing="6">
           <HStack>
             <Text>Scatter:</Text>
             <Switch isChecked={scatterActive} onChange={toggleScatterActive} />
@@ -112,7 +112,7 @@ const Index = () => {
           layers={layers}
         >
           <StaticMap
-            mapStyle="mapbox://styles/mapbox/navigation-night-v1"
+            mapStyle="mapbox://styles/djaustin/cl2w8osxe000t15qbtajv7o2x"
             mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
           />
         </DeckGL>
