@@ -5,6 +5,7 @@ import {
   HStack,
   Switch,
   useBoolean,
+  Stack,
 } from "@chakra-ui/react";
 import { HeatmapLayer, HexagonLayer } from "@deck.gl/aggregation-layers";
 import { ScatterplotLayer } from "@deck.gl/layers";
@@ -77,7 +78,7 @@ const Index = () => {
 
   return (
     <>
-      <HStack
+      <Stack
         justify="space-between"
         bg="gray.100"
         p="2"
@@ -85,6 +86,7 @@ const Index = () => {
         top="0"
         w="full"
         left="0"
+        direction={{ base: "column", lg: "row" }}
         zIndex={5}
       >
         <Heading>Starbuckses of the World</Heading>
@@ -102,7 +104,7 @@ const Index = () => {
             <Switch isChecked={hexagonActive} onChange={toggleHexagonActive} />
           </HStack>
         </HStack>
-      </HStack>
+      </Stack>
       <Box h="100vh">
         <DeckGL
           controller={true}
