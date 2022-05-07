@@ -1,56 +1,79 @@
-import {
-  Link as ChakraLink,
-  Text,
-  Code,
-  List,
-  ListIcon,
-  ListItem,
-} from '@chakra-ui/react'
-import { CheckCircleIcon, LinkIcon } from '@chakra-ui/icons'
+import { Box } from "@chakra-ui/react";
+import { HeatmapLayer, HexagonLayer } from "@deck.gl/aggregation-layers";
+import { ScatterplotLayer } from "@deck.gl/layers";
+import DeckGL from "@deck.gl/react";
+import { useState } from "react";
+import StaticMap from "react-map-gl";
+// Viewport settings
+const INITIAL_VIEW_STATE = {
+  longitude: -0.118092,
+  latitude: 51.509865,
+  zoom: 13,
+  pitch: 0,
+  bearing: 0,
+};
+export interface Store {
+  storeNumber: string;
+  countryCode: string;
+  ownershipTypeCode: string;
+  schedule: string;
+  slug: string;
+  latitude: number;
+  longitude: number;
+  streetAddressLine1: string;
+  streetAddressLine2: string;
+  streetAddressLine3: string;
+  city: string;
+  countrySubdivisionCode: number;
+  postalCode: string;
+  currentTimeOffset: number;
+  windowsTimeZoneId: string;
+  olsonTimeZoneId: string;
+}
 
-import { Hero } from '../components/Hero'
-import { Container } from '../components/Container'
-import { Main } from '../components/Main'
-import { DarkModeSwitch } from '../components/DarkModeSwitch'
-import { CTA } from '../components/CTA'
-import { Footer } from '../components/Footer'
+const Index = () => {
+  const hexagon = new HexagonLayer<Store>({
+    id: "starbucks-heat",
+    data: "starbucks.json",
+    getPosition: (d) => [d.longitude, d.latitude],
+    getElevationWeight: (d) => 1,
+    elevationScale: 50,
+    extruded: true,
+    radius: 1000,
+  });
+  const heatmap = new HeatmapLayer<Store>({
+    id: "starbucks-hex",
+    data: "starbucks.json",
+    getPosition: (d) => [d.longitude, d.latitude],
+    getWeight: (d) => 2,
+  });
+  const scatter = new ScatterplotLayer<Store>({
+    id: "starbucks-points",
+    data: "starbucks.json",
+    pickable: true,
+    onClick: ({ object }) => alert(object.streetAddressLine1),
+    getPosition: (d) => [d.longitude, d.latitude],
+    radiusMinPixels: 10,
+    getFillColor: () => [0, 112, 74],
+  });
+  const [layers, setLayers] = useState([heatmap, scatter, hexagon]);
+  return (
+    <Box h="100vh" w="100vh">
+      <DeckGL
+        onViewStateChange={(e) =>
+          setLayers(e.viewState.zoom > 13 ? [scatter] : [heatmap, hexagon])
+        }
+        controller={true}
+        initialViewState={INITIAL_VIEW_STATE}
+        layers={layers}
+      >
+        <StaticMap
+          mapStyle="mapbox://styles/mapbox/navigation-night-v1"
+          mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
+        />
+      </DeckGL>
+    </Box>
+  );
+};
 
-const Index = () => (
-  <Container height="100vh">
-    <Hero />
-    <Main>
-      <Text color="text">
-        Example repository of <Code>Next.js</Code> + <Code>chakra-ui</Code> +{' '}
-        <Code>TypeScript</Code>.
-      </Text>
-
-      <List spacing={3} my={0} color="text">
-        <ListItem>
-          <ListIcon as={CheckCircleIcon} color="green.500" />
-          <ChakraLink
-            isExternal
-            href="https://chakra-ui.com"
-            flexGrow={1}
-            mr={2}
-          >
-            Chakra UI <LinkIcon />
-          </ChakraLink>
-        </ListItem>
-        <ListItem>
-          <ListIcon as={CheckCircleIcon} color="green.500" />
-          <ChakraLink isExternal href="https://nextjs.org" flexGrow={1} mr={2}>
-            Next.js <LinkIcon />
-          </ChakraLink>
-        </ListItem>
-      </List>
-    </Main>
-
-    <DarkModeSwitch />
-    <Footer>
-      <Text>Next ❤️ Chakra</Text>
-    </Footer>
-    <CTA />
-  </Container>
-)
-
-export default Index
+export default Index;
