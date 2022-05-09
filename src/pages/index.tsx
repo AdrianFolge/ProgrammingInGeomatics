@@ -70,7 +70,7 @@ const Index = () => {
       height: 128,
       anchorY: 128,
     }),
-    getSize: () => 20,
+    getSize: () => 50,
     pickable: true,
   });
 
@@ -118,7 +118,11 @@ const Index = () => {
           layers={layers}
           getTooltip={({ object }: any) =>
             object &&
-            `${object.streetAddressLine1}${object.streetAddressLine2 && "\n" + object.streetAddressLine2}${object.streetAddressLine3 && "\n" + object.streetAddressLine3}${object.city && "\n" + object.city}${object.postalCode && "\n" + object.postalCode}`
+            `${object.streetAddressLine1}${
+              object.streetAddressLine2 && "\n" + object.streetAddressLine2
+            }${object.streetAddressLine3 && "\n" + object.streetAddressLine3}${
+              object.city && "\n" + object.city
+            }${object.postalCode && "\n" + object.postalCode}`
           }
         >
           <StaticMap
