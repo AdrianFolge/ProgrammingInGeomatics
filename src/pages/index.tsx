@@ -8,10 +8,11 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import { HeatmapLayer, HexagonLayer } from "@deck.gl/aggregation-layers";
-import { ScatterplotLayer } from "@deck.gl/layers";
+import { ScatterplotLayer, IconLayer } from "@deck.gl/layers";
 import DeckGL from "@deck.gl/react";
-import { useEffect, useMemo, useState } from "react";
-import StaticMap from "react-map-gl";
+import { useMemo } from "react";
+import StaticMap, { NavigationControl } from "react-map-gl";
+import StarbucksIcon from "../../public/starbucks.png";
 // Viewport settings
 const INITIAL_VIEW_STATE = {
   longitude: -0.118092,
@@ -41,8 +42,8 @@ export interface Store {
 
 const Index = () => {
   const [heatmapActive, { toggle: toggleHeatmapActive }] = useBoolean(false);
-  const [scatterActive, { toggle: toggleScatterActive }] = useBoolean(false);
-  const [hexagonActive, { toggle: toggleHexagonActive }] = useBoolean(true);
+  const [pointsActive, { toggle: togglePointsActive }] = useBoolean(true);
+  const [hexagonActive, { toggle: toggleHexagonActive }] = useBoolean(false);
   const hexagon = new HexagonLayer<Store>({
     id: "starbucks-heat",
     data: "starbucks.json",
@@ -58,23 +59,28 @@ const Index = () => {
     getPosition: (d) => [d.longitude, d.latitude],
     getWeight: (d) => 2,
   });
-  const scatter = new ScatterplotLayer<Store>({
-    id: "starbucks-points",
+
+  const icons = new IconLayer<Store>({
+    id: "icons",
     data: "starbucks.json",
-    pickable: true,
-    onClick: ({ object }) => alert(object.streetAddressLine1),
     getPosition: (d) => [d.longitude, d.latitude],
-    radiusMinPixels: 10,
-    getFillColor: () => [255, 0, 0],
+    getIcon: () => ({
+      url: "starbucks.png",
+      width: 128,
+      height: 128,
+      anchorY: 128,
+    }),
+    getSize: () => 20,
+    pickable: true,
   });
 
   const layers = useMemo(() => {
     const newLayers: any[] = [];
-    if (scatterActive) newLayers.push(scatter);
+    if (pointsActive) newLayers.push(icons);
     if (heatmapActive) newLayers.push(heatmap);
     if (hexagonActive) newLayers.push(hexagon);
     return newLayers;
-  }, [scatter, scatterActive, heatmapActive, hexagonActive, hexagon, heatmap]);
+  }, [icons, pointsActive, heatmapActive, hexagonActive, hexagon, heatmap]);
 
   return (
     <>
@@ -92,8 +98,8 @@ const Index = () => {
         <Heading>Starbuckses of the World</Heading>
         <HStack spacing="6">
           <HStack>
-            <Text>Scatter:</Text>
-            <Switch isChecked={scatterActive} onChange={toggleScatterActive} />
+            <Text>Points:</Text>
+            <Switch isChecked={pointsActive} onChange={togglePointsActive} />
           </HStack>
           <HStack>
             <Text>Heatmap:</Text>
@@ -110,9 +116,13 @@ const Index = () => {
           controller={true}
           initialViewState={INITIAL_VIEW_STATE}
           layers={layers}
+          getTooltip={({ object }: any) =>
+            object &&
+            `${object.streetAddressLine1}${object.streetAddressLine2 && "\n" + object.streetAddressLine2}${object.streetAddressLine3 && "\n" + object.streetAddressLine3}${object.city && "\n" + object.city}${object.postalCode && "\n" + object.postalCode}`
+          }
         >
           <StaticMap
-            mapStyle="mapbox://styles/djaustin/cl2w8osxe000t15qbtajv7o2x"
+            mapStyle="mapbox://styles/mapbox/dark-v10"
             mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
           />
         </DeckGL>
