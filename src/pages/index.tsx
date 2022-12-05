@@ -13,6 +13,8 @@ import DeckGL from "@deck.gl/react";
 import { useMemo } from "react";
 import StaticMap, { NavigationControl } from "react-map-gl";
 import StarbucksIcon from "../../public/starbucks.png";
+import turf from "turf";
+import Header from "../components/Header"
 // Viewport settings
 const INITIAL_VIEW_STATE = {
   longitude: -0.118092,
@@ -40,13 +42,27 @@ export interface Store {
   olsonTimeZoneId: string;
 }
 
+
+
+function makeRadius(lngLatArray, radiusInMeters) {
+  var point = turf.point(lngLatArray);
+  var buffered = turf.buffer(point, radiusInMeters, { units: 'meters' });
+  return buffered;
+}
+
+var bucks = require("/Users/adrianfolge/Documents/test/deck-example/public/starbucks.json")
+
+
+
+
+
 const Index = () => {
   const [heatmapActive, { toggle: toggleHeatmapActive }] = useBoolean(false);
   const [pointsActive, { toggle: togglePointsActive }] = useBoolean(true);
   const [hexagonActive, { toggle: toggleHexagonActive }] = useBoolean(false);
   const hexagon = new HexagonLayer<Store>({
     id: "starbucks-heat",
-    data: "starbucks.json",
+    data: bucks,
     getPosition: (d) => [d.longitude, d.latitude],
     getElevationWeight: (d) => 1,
     elevationScale: 50,
@@ -55,7 +71,7 @@ const Index = () => {
   });
   const heatmap = new HeatmapLayer<Store>({
     id: "starbucks-hex",
-    data: "starbucks.json",
+    data: bucks,
     getPosition: (d) => [d.longitude, d.latitude],
     getWeight: (d) => 2,
   });
@@ -65,7 +81,7 @@ const Index = () => {
     data: "starbucks.json",
     getPosition: (d) => [d.longitude, d.latitude],
     getIcon: () => ({
-      url: "starbucks.png",
+      //url: "starbucks.png",
       width: 128,
       height: 128,
       anchorY: 128,
@@ -84,6 +100,7 @@ const Index = () => {
 
   return (
     <>
+    <Header />
       <Stack
         justify="space-between"
         bg="gray.100"
@@ -127,7 +144,7 @@ const Index = () => {
         >
           <StaticMap
             mapStyle="mapbox://styles/mapbox/dark-v10"
-            mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
+            mapboxAccessToken="pk.eyJ1IjoiYWRyaWFuZmgiLCJhIjoiY2w2ZjM0NG91MGRxZDNpb3IwdnF5YzI0ZCJ9.Uutx0rtavBiPVT-_adhxxw"
           />
         </DeckGL>
       </Box>

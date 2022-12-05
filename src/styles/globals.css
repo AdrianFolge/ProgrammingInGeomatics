@@ -1,0 +1,262 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .button {
+        @apply px-4 py-2 border rounded-full cursor-pointer hover:shadow-lg active:scale-95 active:bg-gray-100 transition transform duration-100 ease-out;
+    }
+}
+
+h1, h2,h3 {
+    font-family: 'Saira', sans-serif;
+ 
+
+    font-weight: 400;
+    }
+
+.header {
+    position: fixed;
+    height: 90px;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    transition: .3s ease-in;
+    overflow: hidden;
+    background-color: rgba(0,0,0,.9);
+}
+
+.header .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1240px;
+    margin: auto;
+    height: 100%;
+    padding: 0 1rem;
+}
+
+.header .nav-menu a {
+    color: #ffffff;
+}
+
+.header .navbar img {
+    width: 250px;
+    height: auto;
+}
+
+.header .nav-menu {
+    display: flex;
+}
+
+.header .nav-item {
+    padding: 1rem;
+    font-weight: 500;
+}
+
+.header .nav-item a:hover {
+    padding-bottom: 12px;
+    border-bottom: 3px solid var(--secondary-color);
+}
+
+.hamburger {
+    display: none;
+}
+
+
+@media screen and (max-width:940px) {
+    .header {
+        max-width: 100%;
+        background-color: rgba(0,0,0,.9);
+    }
+
+    .header .navbar {
+        max-width: 100%;
+    }
+
+    .hamburger {
+        display: block;
+    }
+
+    .nav-menu {
+        position: fixed;
+        left: -100%;
+        top: 90px;
+        flex-direction: column;
+        background-color: rgba(0,0,0,.9);
+        width: 100%;
+        height: 90vh;
+        z-index: 999;
+        text-align: center;
+        transition: .3s;
+    }
+
+    .nav-menu.active {
+        left: 0;
+    }
+
+    .nav-item {
+        margin: 1.5rem 0;
+    }
+
+    .header .navbar img {
+        width: 150px;
+    }
+}
+.marker-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.marker-btn img {
+
+    width: 60px;
+    height: 35px;
+
+}
+
+.dance {
+    transform: rotate(45deg);
+    
+}
+
+.dance_inverse {
+    transform: rotate(-45deg);
+}
+
+
+.termos{
+    height: 400px;
+    width: 180px;
+    border: 6px solid #efb54a;
+    position: relative;
+    border-radius: 50% 50% 0% 0%;
+    background:url(/stor_farge.png);
+    box-shadow: 0px 0px 0px 6px grey;
+    background-repeat: repeat-x;
+    background-position: 30px 30px;
+    animation: fill 5s infinite;
+    animation-fill-mode: forwards;
+    top: 30%;
+    left: 40%;
+
+}
+
+:root{
+    --x-under: 0px;
+    --x-over: 0px;
+
+
+}
+
+
+@keyframes fill {
+
+
+    from {
+        background-position: 30px var(--x-under);
+    }
+    to {
+        background-position: 900px var(--x-over);
+    }
+
+
+
+
+
+
+
+
+ 
+}
+
+.handle{
+
+    height: 250px;
+    width: 100px;
+
+    border-top: 10px solid black;
+    border-right: 10px solid black;
+    border-left: 0;
+    border-bottom: 0px solid #efb54a ;
+
+
+    position: relative;
+    left:170px;
+    top:60px;
+    border-radius: 0px 25px 80px 0px;
+
+
+}
+
+
+
+
+.square{
+    height: 80px;
+    width: 70px;
+    background: black;
+    position: relative;
+    left: 55px;
+    top: -350px;
+    border-radius: 15px 15px 15px 15px;
+
+}
+
+.tut{
+    width: 0;
+    height: 0;
+    border-top: 50px solid black;
+    border-left: 50px solid transparent;
+    position: relative;
+    left: 20px;
+    top: -300px;
+}
+
+.percentage_display{
+    position: absolute;
+    height: 50px;
+    width: 50px;
+    top: 420px;
+    left: 80px;
+    /*background-color: #efb54a;
+    font-style: Arial, Courier, monospace;
+    */
+    color: #efb54a;
+    background: #D2691E;  
+    font-size: 50px; line-height: 40px; 
+    font-weight: 700; margin: 0 5px 24px; 
+    text-decoration: none;
+    padding: 10px;
+    padding-top: -300px;
+    padding-bottom: 30px;
+    padding-right: 40px;
+    margin: 0 5px 24px;
+    float: right; 
+    font-family: 'Libre Baskerville', serif; line-height: 40px;
+    
+
+}
+
+.volume_display{
+    position: absolute;
+    height: 50px;
+    width: 50px;
+    top: 420px;
+    left: -10px;
+    /*background-color: #efb54a;
+    font-style: Arial, Courier, monospace;
+    */
+    color: #efb54a; 
+    background: #D2691E; 
+    font-size: 50px; line-height: 40px; 
+    font-weight: 700; margin: 0 5px 24px; 
+    float: left; 
+    padding: 10px; 
+    padding-top: -10px;
+    padding-bottom: 30px;
+    margin: 0 5px 24px; 
+    font-family: 'Libre Baskerville', serif; 
+}
