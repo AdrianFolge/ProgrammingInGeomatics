@@ -38,12 +38,13 @@ const NavHeader: FC<HeaderProps> = ({ activeTab, onTabClicked }) =>(
 );
 
 
-export const Sidebar = ({sliderValue, handleSliderChange, radius, iconsNumber, ok}) => {
+export const Sidebar = ({sliderValue, handleSliderChange, radius, iconsNumber, cc, klikken, fileLength}) => {
     const [activeTab, setActiveTab] = 
         useState<number>(0);
     const handleTabClicked = (tab: number) => {
         setActiveTab(tab);
     };
+
     return(
         <aside className="sidebar">
             <NavHeader 
@@ -110,12 +111,13 @@ export const Sidebar = ({sliderValue, handleSliderChange, radius, iconsNumber, o
       />
       <div className="switch-label">Radius in km: {radius}</div>
       <div className="switch-label">Number of bus stops: {iconsNumber}</div>
+      <div className="switch-label">Length of file: {fileLength}</div>
       <div>
         
-        <input type="number" className="glow" ></input>
-        <button className="glow">
+        <input type="number" className="glow" id="unik" onChange={cc}></input>
+        <div className="glow" onClick={klikken}>
           OK
-        </button>
+        </div>
       </div>
             </form>
           </div>

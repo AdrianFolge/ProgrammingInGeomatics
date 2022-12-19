@@ -44,19 +44,15 @@ export interface Store {
   olsonTimeZoneId: string;
 }
 
-//var bucks = require("/Users/adrianfolge/Documents/test/deck-example/public/starbucks.json")
-var buss = require("/Users/adrianfolge/Documents/test/deck-example/public/csvjson.json")
-buss = buss.slice(0,1000)
-
-function calculateDistances() {
-  var N = buss.length
+function calculateDistances(file) {
+  var N = file.length
   var n = 0
-  buss.forEach(element => {
-    var from = turf.point([element.LONGITUDE, element.LATITUDE])
+  file.forEach(element => {
+    var from = turf.point([element.lon, element.lat])
     var to;
     var distance_array = [];
-    buss.forEach(second => {
-      to = turf.point([second.LONGITUDE, second.LATITUDE]);
+    file.forEach(second => {
+      to = turf.point([second.lon, second.lat]);
       distance_array.push(turf.distance(from,to))
     
     });
@@ -67,19 +63,13 @@ function calculateDistances() {
   });
 }
 
-calculateDistances();
-//var distance = turf.distance(from, to, options);
-
-
-
-
-
-
 
 const Index = () => {
-  const [slicedValue, setSlicedValue] = useState(30);
+  var r =require("/Users/adrianfolge/Documents/test/deck-example/public/stores.json")
+  const [slicedValue, setSlicedValue] = useState(0);
   const [sliderValue, setSliderValue] = useState(0);
   const [viewPort, setviewPort] = useState(0);
+  const [buss, setBuss] = useState(r.slice(0,100));
   const[D, setD] = useState(buss)
   const[radius, setRadius] = useState(0);
   const[iconsNumber, setIconsNumber] = useState(0);
@@ -90,7 +80,18 @@ const Index = () => {
   });
 
 
- 
+  const [vv, setVv] = useState(0);
+
+  const cc = (e) => {
+    setVv(e.target.value)
+  }
+  const klikken= () =>{
+    setBuss(r.slice(0,vv))
+    calculateDistances(buss);
+  }
+
+
+
 
   // This function will be called when the user moves the slider
   const handleSliderChange = (event) => {
@@ -110,23 +111,23 @@ const Index = () => {
   const hexagon = new HexagonLayer<Store>({
     id: "starbucks-heat",
     data: D,
-    getPosition: (d) => [d.LONGITUDE,d.LATITUDE],
+    getPosition: (d) => [d.lon,d.lat],
     getElevationWeight: (d) => 1,
     elevationScale: 50,
     extruded: true,
-    radius: 1000,
+    radius: 500,
   });
   const heatmap = new HeatmapLayer<Store>({
     id: "starbucks-hex",
     data: D,
-    getPosition: (d) => [d.LONGITUDE,d.LATITUDE],
+    getPosition: (d) => [d.lon,d.lat],
     getWeight: (d) => 2,
   });
 
   const icons = new IconLayer<Store>({
     id: "icons",
     data: D,
-    getPosition: (d) => [d.LONGITUDE,d.LATITUDE],
+    getPosition: (d) => [d.lon,d.lat],
     getIcon: () => ({
       url: "point.jpeg",
       width: 128,
@@ -144,6 +145,8 @@ const Index = () => {
     if (hexagonActive) newLayers.push(hexagon);
     return newLayers;
   }, [icons, pointsActive, heatmapActive, hexagonActive, hexagon, heatmap]);
+
+
 
   return (
     <>
@@ -197,9 +200,10 @@ const Index = () => {
         </DeckGL>
       </Box>
 
-      <Sidebar handleSliderChange={handleSliderChange} sliderValue={sliderValue} radius={radius} iconsNumber={iconsNumber} ok={"HEI"}/>
+      <Sidebar handleSliderChange={handleSliderChange} sliderValue={sliderValue} radius={radius} iconsNumber={iconsNumber} cc={cc} klikken={klikken} fileLength={r.length}/>
     </>
   );
 };
 
 export default Index;
+
