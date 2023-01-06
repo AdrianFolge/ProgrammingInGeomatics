@@ -17,6 +17,8 @@ import turf from "turf";
 import Header from "../components/Header"
 import { Sidebar } from "../components/Sidebar";
 
+
+
 // Viewport settings
 const INITIAL_VIEW_STATE = {
   longitude: -0.118092,
@@ -42,6 +44,7 @@ export interface Store {
   currentTimeOffset: number;
   windowsTimeZoneId: string;
   olsonTimeZoneId: string;
+  message: string;
 }
 
 function calculateDistances(file) {
@@ -65,12 +68,29 @@ function calculateDistances(file) {
 
 
 const Index = () => {
-  var r =require("/Users/adrianfolge/Documents/test/deck-example/public/stores.json")
+
+  var r =require("../../public/csvjson.json")
+  r.forEach(element => {
+    if(element.lat) {
+    }
+    if(element.Lat) {
+      element.lat = element.Lat
+      element.lon = element.Lon
+    }
+    if(element.LATITUDE) {
+      element.lat = element.LATITUDE
+      element.lon = element.LONGITUDE
+    }
+    
+  });
+
   const [slicedValue, setSlicedValue] = useState(0);
   const [sliderValue, setSliderValue] = useState(0);
+  const [mapboxStyle, setMapboxStyle] = useState("mapbox://styles/mapbox/dark-v10");
+  const [file, setFile] = useState(require("../../public/csvjson.json").slice(0,1000))
   const [viewPort, setviewPort] = useState(0);
-  const [buss, setBuss] = useState(r.slice(0,100));
-  const[D, setD] = useState(buss)
+  const [buss, setBuss] = useState(file.slice(0,100));
+  const[D, setD] = useState(file.slice(0,100))
   const[radius, setRadius] = useState(0);
   const[iconsNumber, setIconsNumber] = useState(0);
   const [mapState, setMapState] = useState({
@@ -79,6 +99,48 @@ const Index = () => {
     zoom: 3
   });
 
+  file.forEach(element => {
+    if(element.lat) {
+    }
+    if(element.Lat) {
+      element.lat = element.Lat
+      element.lon = element.Lon
+    }
+    if(element.LATITUDE) {
+      element.lat = element.LATITUDE
+      element.lon = element.LONGITUDE
+    }
+
+    if(element.latitude) {
+      element.lat = element.latitude
+      element.lon = element.longitude
+    }
+    
+  });
+  const [initialLong, setInitialLong] = useState(file[0].lon)
+  const [initialLat, setInitialLat] = useState(file[0].lat)
+  const INITIAL_VIEW_STATE = {
+    longitude: initialLong,
+    latitude: initialLat,
+    zoom: 5,
+    pitch: 45,
+    bearing: 0,
+  };
+
+  const testToggle= (event) =>{
+  setMapboxStyle(event.value)
+}
+const filesToggle= (event) =>{
+  setFile(event.value)
+  setInitialLong(file[0].lon)
+  setInitialLat(file[0].lat)
+  
+}
+
+const onClick = () =>{
+  console.log("YEAH")
+}
+
 
   const [vv, setVv] = useState(0);
 
@@ -86,8 +148,8 @@ const Index = () => {
     setVv(e.target.value)
   }
   const klikken= () =>{
-    setBuss(r.slice(0,vv))
-    calculateDistances(buss);
+    setFile(file.slice(0,vv))
+    calculateDistances(file);
   }
 
 
@@ -97,8 +159,8 @@ const Index = () => {
   const handleSliderChange = (event) => {
     setSliderValue(event.target.value);
     setRadius(event.target.value);
-    setD(buss.filter(item => (item["closest"] > event.target.value)));
-    setIconsNumber(D.length);
+    setFile(file.filter(item => (item["closest"] > event.target.value)));
+    setIconsNumber(file.length);
     setMapState({latitude: event.target.value,
                   longitude: 10.61,
                   zoom: 8})
@@ -110,7 +172,7 @@ const Index = () => {
   const [hexagonActive, { toggle: toggleHexagonActive }] = useBoolean(false);
   const hexagon = new HexagonLayer<Store>({
     id: "starbucks-heat",
-    data: D,
+    data: file,
     getPosition: (d) => [d.lon,d.lat],
     getElevationWeight: (d) => 1,
     elevationScale: 50,
@@ -119,14 +181,15 @@ const Index = () => {
   });
   const heatmap = new HeatmapLayer<Store>({
     id: "starbucks-hex",
-    data: D,
+    data: file,
     getPosition: (d) => [d.lon,d.lat],
     getWeight: (d) => 2,
   });
 
   const icons = new IconLayer<Store>({
     id: "icons",
-    data: D,
+    data: file,
+    message: "BYBY",
     getPosition: (d) => [d.lon,d.lat],
     getIcon: () => ({
       url: "point.jpeg",
@@ -136,6 +199,7 @@ const Index = () => {
     }),
     getSize: () => 50,
     pickable: true,
+    onClick: event => console.log(event) 
   });
 
   const layers = useMemo(() => {
@@ -146,61 +210,25 @@ const Index = () => {
     return newLayers;
   }, [icons, pointsActive, heatmapActive, hexagonActive, hexagon, heatmap]);
 
-
-
   return (
     <>
-    <Header />
-
-      <Stack
-        justify="space-between"
-        bg="gray.100"
-        p="2"
-        position="fixed"
-        top="0"
-        w="full"
-        left="0"
-        direction={{ base: "column", lg: "row" }}
-        zIndex={5}
-      >
-        <Heading>Starbuckses of the World</Heading>
-        <HStack spacing="6">
-          <HStack>
-            <Text>Points:</Text>
-            <Switch isChecked={pointsActive} onChange={togglePointsActive} />
-          </HStack>
-          <HStack>
-            <Text>Heatmap:</Text>
-            <Switch isChecked={heatmapActive} onChange={toggleHeatmapActive} />
-          </HStack>
-          <HStack>
-            <Text>Hexagons:</Text>
-            <Switch isChecked={hexagonActive} onChange={toggleHexagonActive} />
-          </HStack>
-        </HStack>
-      </Stack>
       <Box h="100vh">
         <DeckGL
           controller={true}
           initialViewState={INITIAL_VIEW_STATE}
           layers={layers}
           getTooltip={({ object }: any) =>
-            object &&
-            `${object.streetAddressLine1}${
-              object.streetAddressLine2 && "\n" + object.streetAddressLine2
-            }${object.streetAddressLine3 && "\n" + object.streetAddressLine3}${
-              object.city && "\n" + object.city
-            }${object.postalCode && "\n" + object.postalCode}`
+            object && object.store_id
           }
         >
           <StaticMap
-            mapStyle="mapbox://styles/mapbox/dark-v10"
+            mapStyle={mapboxStyle}
             mapboxAccessToken="pk.eyJ1IjoiYWRyaWFuZmgiLCJhIjoiY2w2ZjM0NG91MGRxZDNpb3IwdnF5YzI0ZCJ9.Uutx0rtavBiPVT-_adhxxw"
           />
         </DeckGL>
       </Box>
 
-      <Sidebar handleSliderChange={handleSliderChange} sliderValue={sliderValue} radius={radius} iconsNumber={iconsNumber} cc={cc} klikken={klikken} fileLength={r.length}/>
+      <Sidebar handleSliderChange={handleSliderChange} sliderValue={sliderValue} radius={radius} iconsNumber={iconsNumber} cc={cc} klikken={klikken} fileLength={file.length} pointsActive={pointsActive} togglePointsActive={togglePointsActive} heatmapActive={heatmapActive} toggleHeatmapActive={toggleHeatmapActive} hexagonActive={hexagonActive} toggleHexagonActive={toggleHexagonActive} testToggle={testToggle} filesToggle={filesToggle}/>
     </>
   );
 };

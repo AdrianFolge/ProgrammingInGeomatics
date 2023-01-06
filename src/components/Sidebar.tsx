@@ -1,6 +1,38 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useState, useReducer } from "react";
+import {
+  Box,
+  Text,
+  Heading,
+  HStack,
+  Switch,
+  useBoolean,
+  Stack,
+} from "@chakra-ui/react";
+import Select from 'react-select'
+import Head from "next/head";
+import DropZone from "../components/DropZone";
+import styles from "../styles/Home.module.css";
+
+const options = [
+  { value: 'mapbox://styles/mapbox/dark-v11', label: 'Dark theme' },
+  { value: 'mapbox://styles/mapbox/light-v11', label: 'Light theme' },
+  { value: 'mapbox://styles/mapbox/satellite-v9', label: 'Satellite theme' },
+  { value: 'mapbox://styles/mapbox/streets-v12', label: 'Streets' },
+  { value: 'mapbox://styles/mapbox/outdoors-v12', label: 'Outdoors' },
+  { value: 'mapbox://styles/mapbox/navigation-day-v1', label: 'Navigation day' }
+]
+
+const files = [
+  { value: require("../../public/csvjson.json").slice(0,1000), label: 'Bussdata' },
+  { value: require("../../public/stores.json").slice(0,1000), label: 'Storesdata' },
+  { value: require("../../public/starbucks.json").slice(0,1000), label: 'Starbucksdata' }
+]
+
 
 // Setter verdien for hvor mange instanser av elementer i filen man vil ha.
+
+
+
 
 
 const Icon = ({ icon  }: { icon: string }) => (
@@ -38,12 +70,28 @@ const NavHeader: FC<HeaderProps> = ({ activeTab, onTabClicked }) =>(
 );
 
 
-export const Sidebar = ({sliderValue, handleSliderChange, radius, iconsNumber, cc, klikken, fileLength}) => {
+export const Sidebar = ({sliderValue, handleSliderChange, radius, iconsNumber, cc, klikken, fileLength, pointsActive, togglePointsActive, heatmapActive, toggleHeatmapActive, hexagonActive, toggleHexagonActive, testToggle, filesToggle}) => {
     const [activeTab, setActiveTab] = 
         useState<number>(0);
     const handleTabClicked = (tab: number) => {
         setActiveTab(tab);
     };
+
+    // reducer function to handle state changes
+    const reducer = (state, action) => {
+      switch (action.type) {
+        case "SET_IN_DROP_ZONE":
+          return { ...state, inDropZone: action.inDropZone };
+        case "ADD_FILE_TO_LIST":
+          return { ...state, fileList: state.fileList.concat(action.files) };
+        default:
+          return state;
+      }
+    };
+    const [data, dispatch] = useReducer(reducer, {
+      inDropZone: false,
+      fileList: [],
+    });
 
     return(
         <aside className="sidebar">
@@ -53,22 +101,7 @@ export const Sidebar = ({sliderValue, handleSliderChange, radius, iconsNumber, c
             />
 
 <div>
-            <form>
-              <div className="textbox">
-                <span className="material-symbols-outlined">
-                  account_circle
-                </span>
-                <input type="text" required />
-              </div>
-              <div className="textbox">
-                <span className="material-symbols-outlined">lock</span>
-                <input type="password" required />
-              </div>
-              <div className="textbox">
-                <span className="material-symbols-outlined">Email</span>
-                <input  type="text" required />
-              </div>
-            </form>
+ 
           </div>
             <div className="tabs">
                 <div
@@ -81,28 +114,20 @@ export const Sidebar = ({sliderValue, handleSliderChange, radius, iconsNumber, c
 
                     <div>
             <form>
-              <div className="row">
-                <div className="switch-label">Dark Mode</div>
-                <span className="switch">
-                  <input id="switch-round" type="checkbox" />
-                  <label htmlFor="switch-round"></label>
-                </span>
-              </div>
-              <div className="row">
-                <div className="switch-label">Accessibility Mode</div>
-                <span className="switch">
-                  <input id="switch-round" type="checkbox" />
-                  <label htmlFor="switch-round"></label>
-                </span>
-              </div>
-              <div className="row">
-                <div className="switch-label">Quirks Mode</div>
-                <span className="switch">
-                  <input id="switch-round" type="checkbox" />
-                  <label htmlFor="switch-round"></label>
-                </span>
-              </div>
-              <input
+      <div>
+      <Select options={options} onChange={testToggle}   styles={{control: (baseStyles, state) => ({
+      ...baseStyles,
+      borderColor: state.isFocused ? 'grey' : 'purple',
+    }),
+  }}/>
+
+<Select options={files} onChange={filesToggle}   styles={{control: (baseStyles, state) => ({
+      ...baseStyles,
+      borderColor: state.isFocused ? 'grey' : 'purple',
+    }),
+  }}/>
+      </div>
+      <input
         type="range"
         min="-1"
         max="100"
@@ -113,11 +138,30 @@ export const Sidebar = ({sliderValue, handleSliderChange, radius, iconsNumber, c
       <div className="switch-label">Number of bus stops: {iconsNumber}</div>
       <div className="switch-label">Length of file: {fileLength}</div>
       <div>
-        
+        <div className="row">
+          <HStack>
+            <Text className="switch-label">Points:</Text>
+            <Switch isChecked={pointsActive} onChange={togglePointsActive} className="tt"/>
+          </HStack>
+        </div>
+        <div className="row">
+          <HStack>
+            <Text className="switch-label">Heatmap:</Text>
+            <Switch isChecked={heatmapActive} onChange={toggleHeatmapActive} />
+          </HStack>
+        </div>
+        <div className="row">
+          <HStack>
+            <Text className="switch-label">Hexagons:</Text>
+            <Switch isChecked={hexagonActive} onChange={toggleHexagonActive} />
+          </HStack>
+        </div>
         <input type="number" className="glow" id="unik" onChange={cc}></input>
         <div className="glow" onClick={klikken}>
           OK
         </div>
+        <DropZone data={data} dispatch={dispatch} />
+
       </div>
             </form>
           </div>
