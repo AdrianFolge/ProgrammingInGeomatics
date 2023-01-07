@@ -70,7 +70,7 @@ const NavHeader: FC<HeaderProps> = ({ activeTab, onTabClicked }) =>(
 );
 
 
-export const Sidebar = ({sliderValue, handleSliderChange, radius, iconsNumber, cc, klikken, fileLength, pointsActive, togglePointsActive, heatmapActive, toggleHeatmapActive, hexagonActive, toggleHexagonActive, testToggle, filesToggle}) => {
+export const Sidebar = ({sliderValue, handleSliderChange, sliderCircleValue,handleSliderChangeCircle, radius, iconsNumber, cc, klikken, fileLength, pointsActive, togglePointsActive, heatmapActive, toggleHeatmapActive, hexagonActive, toggleHexagonActive,GeoJsonActive, toggleGeoJsonActive, testToggle, filesToggle, circleRadius, circleIconsNumber}) => {
     const [activeTab, setActiveTab] = 
         useState<number>(0);
     const handleTabClicked = (tab: number) => {
@@ -137,6 +137,18 @@ export const Sidebar = ({sliderValue, handleSliderChange, radius, iconsNumber, c
       <div className="switch-label">Radius in km: {radius}</div>
       <div className="switch-label">Number of bus stops: {iconsNumber}</div>
       <div className="switch-label">Length of file: {fileLength}</div>
+
+      <input
+        type="range"
+        min="-1"
+        max="500"
+        value={sliderCircleValue}
+        onChange={handleSliderChangeCircle}
+        />
+
+      <div className="switch-label">Radius in km: {circleRadius}</div>
+      <div className="switch-label">Number of bus stops: {circleIconsNumber}</div>
+      <div className="switch-label">Length of file: {fileLength}</div>
       <div>
         <div className="row">
           <HStack>
@@ -156,12 +168,19 @@ export const Sidebar = ({sliderValue, handleSliderChange, radius, iconsNumber, c
             <Switch isChecked={hexagonActive} onChange={toggleHexagonActive} />
           </HStack>
         </div>
+        <div className="row">
+          <HStack>
+            <Text className="switch-label">GeoJson:</Text>
+            <Switch isChecked={GeoJsonActive} onChange={toggleGeoJsonActive} />
+          </HStack>
+        </div>
         <input type="number" className="glow" id="unik" onChange={cc}></input>
         <div className="glow" onClick={klikken}>
           OK
         </div>
+        <div className="containDropZone">
         <DropZone data={data} dispatch={dispatch} />
-
+        </div>
       </div>
             </form>
           </div>

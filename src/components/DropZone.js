@@ -1,5 +1,4 @@
 
-
 import React, { useState } from "react";
 import Image from "next/image";
 import FilePreview from "./FilePreview";
@@ -76,19 +75,19 @@ const DropZone = ({ data, dispatch }) => {
   const uploadFiles = async () => {
     // get the files from the fileList as an array
     let files = data.fileList;
-    console.log(files)
     // initialize formData object
     const formData = new FormData();
     // loop over files and add to formData
     files.forEach((file) => formData.append("files", file));
+    console.log("KOMMER VI HIT 1")
 
     // Upload the files as a POST request to the server using fetch
     // Note: /api/fileupload is not a real endpoint, it is just an example
     const response = await fetch("/api/fileupload", {
       method: "POST",
       body: formData,
-    }, console.log(formData));
-
+    });
+    console.log(response)
     //successful file upload
     if (response.ok) {
       alert("Files uploaded successfully");
@@ -118,7 +117,7 @@ const DropZone = ({ data, dispatch }) => {
         />
         <label htmlFor="fileSelect">You can select multiple Files</label>
 
-        <h3 className={styles.uploadMessage}>
+        <h3 className="text-blue-600">
           or drag &amp; drop your files here
         </h3>
       </div>

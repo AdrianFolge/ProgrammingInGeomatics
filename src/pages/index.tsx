@@ -8,12 +8,13 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import { HeatmapLayer, HexagonLayer } from "@deck.gl/aggregation-layers";
-import { ScatterplotLayer, IconLayer } from "@deck.gl/layers";
+import { GeoJsonLayer, IconLayer } from "@deck.gl/layers";
 import DeckGL from "@deck.gl/react";
 import { useMemo, useState } from "react";
 import StaticMap, { NavigationControl } from "react-map-gl";
 import turf from "turf";
 import { Sidebar } from "../components/Sidebar";
+import circle from "@turf/circle"
 
 
 
@@ -22,8 +23,8 @@ const INITIAL_VIEW_STATE = {
   longitude: -0.118092,
   latitude: 51.509865,
   zoom: 10,
-  pitch: 45,
-  bearing: 0,
+  pitch: 0,
+  bearing: 10,
 };
 export interface Store {
   storeNumber: string;
@@ -64,15 +65,28 @@ function calculateDistances(file) {
   });
 }
 
+function calculateCircleDistances(file, index) {
+  const from = turf.point([file[index].lon, file[index].lat])
+  file.forEach(element => {
+    var to = turf.point([element.lon, element.lat])
+    element["circleDistance"] = turf.distance(from, to)
+    
+  })
+  console.log(file)
+}
+
 
 const Index = () => {
 
   const [sliderValue, setSliderValue] = useState(0);
+  const [sliderCircleValue, setSliderCircleValue] = useState(0);
   const [mapboxStyle, setMapboxStyle] = useState("mapbox://styles/mapbox/dark-v10");
-  const [file, setFile] = useState(require("../../public/csvjson.json").slice(0,1000))
+  const [file, setFile] = useState(require("../../public/csvjson.json").slice(0,10000))
   const[D, setD] = useState(file.slice(0,100))
   const[radius, setRadius] = useState(0);
   const[iconsNumber, setIconsNumber] = useState(0);
+  const[circleRadius, setCircleRadius] = useState(0);
+  const[CircleIconsNumber, setCircleIconsNumber] = useState(0);
   const [mapState, setMapState] = useState({
     latitude: 37.7577,
     longitude: -122.4376,
@@ -97,7 +111,7 @@ const Index = () => {
     }
     
   });
-  console.log(file)
+
   const [displayFile, setDisplayFile] = useState(file);
   const [initialLong, setInitialLong] = useState(10.64)
   const [initialLat, setInitialLat] = useState(63.4)
@@ -138,6 +152,10 @@ const filesToggle= (event) =>{
   //setInitialLat(file[0].lat)
   
 }
+const [circleCenter, setCirlceCenter] = useState([0,0]);
+const [centerRadius, setCenterRadius] = useState(0)
+
+const circles = circle(circleCenter, centerRadius)
 
 const onClick = () =>{
   console.log("YEAH")
@@ -170,10 +188,23 @@ const onClick = () =>{
                   zoom: 8})
   }
 
+  const handleSliderChangeCircle = (event) => {
+    setCenterRadius(event.target.value);
+    setSliderCircleValue(event.target.value);
+    setDisplayFile(file.filter(item => (item["circleDistance"] < event.target.value)))
+    setCircleRadius(event.target.value)
+    setCircleIconsNumber(displayFile.length)
+    console.log(file[0])
+    
+  }
 
   const [heatmapActive, { toggle: toggleHeatmapActive }] = useBoolean(false);
   const [pointsActive, { toggle: togglePointsActive }] = useBoolean(true);
   const [hexagonActive, { toggle: toggleHexagonActive }] = useBoolean(false);
+  const [GeoJsonActive, { toggle: toggleGeoJsonActive }] = useBoolean(false);
+
+
+  
   const hexagon = new HexagonLayer<Store>({
     id: "starbucks-heat",
     data: displayFile,
@@ -203,7 +234,25 @@ const onClick = () =>{
     }),
     getSize: () => 50,
     pickable: true,
-    onClick: event => console.log(event) 
+    onClick: event => {setDisplayFile(file.filter(item => (item["lat"] === event.object.lat))),setCirlceCenter([event.object.lon, event.object.lat]), setCenterRadius(1), calculateCircleDistances(file ,file.findIndex(item => item["lat"] ===event.object.lat))}
+    //onClick: event => console.log(event.object.lat)
+  });
+
+  const geojson = new GeoJsonLayer<Store>({
+    id: 'geojson-layer',
+    data: circles,
+    pickable: true,
+    stroked: false,
+    filled: true,
+    extruded: true,
+    pointType: 'circle',
+    lineWidthScale: 20,
+    lineWidthMinPixels: 2,
+    getFillColor: [160, 160, 180, 200],
+    getLineColor: [0, 0, 0],
+    getPointRadius: 100,
+    getLineWidth: 1,
+    getElevation: 30
   });
 
   const layers = useMemo(() => {
@@ -211,8 +260,9 @@ const onClick = () =>{
     if (pointsActive) newLayers.push(icons);
     if (heatmapActive) newLayers.push(heatmap);
     if (hexagonActive) newLayers.push(hexagon);
+    if (GeoJsonActive) newLayers.push(geojson);
     return newLayers;
-  }, [icons, pointsActive, heatmapActive, hexagonActive, hexagon, heatmap]);
+  }, [icons, pointsActive, heatmapActive, hexagonActive, GeoJsonActive, hexagon, heatmap, geojson]);
 
   return (
     <>
@@ -232,7 +282,7 @@ const onClick = () =>{
         </DeckGL>
       </Box>
 
-      <Sidebar handleSliderChange={handleSliderChange} sliderValue={sliderValue} radius={radius} iconsNumber={iconsNumber} cc={cc} klikken={klikken} fileLength={file.length} pointsActive={pointsActive} togglePointsActive={togglePointsActive} heatmapActive={heatmapActive} toggleHeatmapActive={toggleHeatmapActive} hexagonActive={hexagonActive} toggleHexagonActive={toggleHexagonActive} testToggle={testToggle} filesToggle={filesToggle}/>
+      <Sidebar handleSliderChange={handleSliderChange} handleSliderChangeCircle={handleSliderChangeCircle} sliderValue={sliderValue} sliderCircleValue={sliderCircleValue} radius={radius} iconsNumber={iconsNumber} cc={cc} klikken={klikken} fileLength={file.length} pointsActive={pointsActive} togglePointsActive={togglePointsActive} heatmapActive={heatmapActive} toggleHeatmapActive={toggleHeatmapActive} hexagonActive={hexagonActive} toggleHexagonActive={toggleHexagonActive} GeoJsonActive={GeoJsonActive} toggleGeoJsonActive={toggleGeoJsonActive} testToggle={testToggle} filesToggle={filesToggle} circleIconsNumber={CircleIconsNumber} circleRadius={circleRadius}/>
     </>
   );
 };

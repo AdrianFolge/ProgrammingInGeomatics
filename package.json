@@ -16,6 +16,7 @@
     "@emotion/styled": "^11",
     "@heroicons/react": "^1.0.6",
     "@mui/material": "^5.11.2",
+    "@turf/circle": "^6.5.0",
     "@turf/distance": "^6.5.0",
     "@types/react": "^18.0.9",
     "@types/react-dom": "^18.0.3",

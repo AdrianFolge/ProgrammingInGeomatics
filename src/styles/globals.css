@@ -465,3 +465,7 @@ form {
     color: #9d5bff;
 
 }
+
+.containDropZone {
+    width: 200px;
+}
