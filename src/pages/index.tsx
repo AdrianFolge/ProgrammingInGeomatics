@@ -82,7 +82,7 @@ const Index = () => {
   const [sliderCircleValue, setSliderCircleValue] = useState(0);
   const [mapboxStyle, setMapboxStyle] = useState("mapbox://styles/mapbox/dark-v10");
   const [file, setFile] = useState(require("../../public/csvjson.json"))
-  const [fileMax, setFileMax] = useState(require("../../public/csvjson.json").slice(0,400))
+  const [fileMax, setFileMax] = useState(require("../../public/csvjson.json").slice(0,1000))
   const[D, setD] = useState(file.slice(0,100))
   const[radius, setRadius] = useState(0);
   const[iconsNumber, setIconsNumber] = useState(0);
