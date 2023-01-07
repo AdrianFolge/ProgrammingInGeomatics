@@ -12,9 +12,7 @@ import { ScatterplotLayer, IconLayer } from "@deck.gl/layers";
 import DeckGL from "@deck.gl/react";
 import { useMemo, useState } from "react";
 import StaticMap, { NavigationControl } from "react-map-gl";
-import StarbucksIcon from "../../public/starbucks.png";
 import turf from "turf";
-import Header from "../components/Header"
 import { Sidebar } from "../components/Sidebar";
 
 
@@ -69,27 +67,9 @@ function calculateDistances(file) {
 
 const Index = () => {
 
-  var r =require("../../public/csvjson.json")
-  r.forEach(element => {
-    if(element.lat) {
-    }
-    if(element.Lat) {
-      element.lat = element.Lat
-      element.lon = element.Lon
-    }
-    if(element.LATITUDE) {
-      element.lat = element.LATITUDE
-      element.lon = element.LONGITUDE
-    }
-    
-  });
-
-  const [slicedValue, setSlicedValue] = useState(0);
   const [sliderValue, setSliderValue] = useState(0);
   const [mapboxStyle, setMapboxStyle] = useState("mapbox://styles/mapbox/dark-v10");
   const [file, setFile] = useState(require("../../public/csvjson.json").slice(0,1000))
-  const [viewPort, setviewPort] = useState(0);
-  const [buss, setBuss] = useState(file.slice(0,100));
   const[D, setD] = useState(file.slice(0,100))
   const[radius, setRadius] = useState(0);
   const[iconsNumber, setIconsNumber] = useState(0);
@@ -117,8 +97,10 @@ const Index = () => {
     }
     
   });
-  const [initialLong, setInitialLong] = useState(file[0].lon)
-  const [initialLat, setInitialLat] = useState(file[0].lat)
+  console.log(file)
+  const [displayFile, setDisplayFile] = useState(file);
+  const [initialLong, setInitialLong] = useState(10.64)
+  const [initialLat, setInitialLat] = useState(63.4)
   const INITIAL_VIEW_STATE = {
     longitude: initialLong,
     latitude: initialLat,
@@ -132,8 +114,28 @@ const Index = () => {
 }
 const filesToggle= (event) =>{
   setFile(event.value)
-  setInitialLong(file[0].lon)
-  setInitialLat(file[0].lat)
+  calculateDistances(file);
+  file.forEach(element => {
+    if(element.lat) {
+    }
+    if(element.Lat) {
+      element.lat = element.Lat
+      element.lon = element.Lon
+    }
+    if(element.LATITUDE) {
+      element.lat = element.LATITUDE
+      element.lon = element.LONGITUDE
+    }
+
+    if(element.latitude) {
+      element.lat = element.latitude
+      element.lon = element.longitude
+    }
+    
+  });
+  setDisplayFile(file)
+  //setInitialLong(file[0].lon)
+  //setInitialLat(file[0].lat)
   
 }
 
@@ -145,6 +147,7 @@ const onClick = () =>{
   const [vv, setVv] = useState(0);
 
   const cc = (e) => {
+    console.log("CC funksjon")
     setVv(e.target.value)
   }
   const klikken= () =>{
@@ -157,10 +160,11 @@ const onClick = () =>{
 
   // This function will be called when the user moves the slider
   const handleSliderChange = (event) => {
+    console.log("HER ERROR")
     setSliderValue(event.target.value);
     setRadius(event.target.value);
-    setFile(file.filter(item => (item["closest"] > event.target.value)));
-    setIconsNumber(file.length);
+    setDisplayFile(file.filter(item => (item["closest"] > event.target.value)));
+    setIconsNumber(displayFile.length);
     setMapState({latitude: event.target.value,
                   longitude: 10.61,
                   zoom: 8})
@@ -172,7 +176,7 @@ const onClick = () =>{
   const [hexagonActive, { toggle: toggleHexagonActive }] = useBoolean(false);
   const hexagon = new HexagonLayer<Store>({
     id: "starbucks-heat",
-    data: file,
+    data: displayFile,
     getPosition: (d) => [d.lon,d.lat],
     getElevationWeight: (d) => 1,
     elevationScale: 50,
@@ -181,14 +185,14 @@ const onClick = () =>{
   });
   const heatmap = new HeatmapLayer<Store>({
     id: "starbucks-hex",
-    data: file,
+    data: displayFile,
     getPosition: (d) => [d.lon,d.lat],
     getWeight: (d) => 2,
   });
 
   const icons = new IconLayer<Store>({
     id: "icons",
-    data: file,
+    data: displayFile,
     message: "BYBY",
     getPosition: (d) => [d.lon,d.lat],
     getIcon: () => ({
