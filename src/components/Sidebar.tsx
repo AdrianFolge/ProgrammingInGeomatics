@@ -23,9 +23,9 @@ const options = [
 ]
 
 const files = [
-  { value: require("../../public/csvjson.json").slice(0,1000), label: 'Bussdata' },
-  { value: require("../../public/stores.json").slice(0,1000), label: 'Storesdata' },
-  { value: require("../../public/starbucks.json").slice(0,1000), label: 'Starbucksdata' }
+  { value: require("../../public/csvjson.json"), label: 'Bussdata' },
+  { value: require("../../public/stores.json"), label: 'Storesdata' },
+  { value: require("../../public/starbucks.json"), label: 'Starbucksdata' }
 ]
 
 
@@ -70,7 +70,7 @@ const NavHeader: FC<HeaderProps> = ({ activeTab, onTabClicked }) =>(
 );
 
 
-export const Sidebar = ({sliderValue, handleSliderChange, sliderCircleValue,handleSliderChangeCircle, radius, iconsNumber, cc, klikken, fileLength, pointsActive, togglePointsActive, heatmapActive, toggleHeatmapActive, hexagonActive, toggleHexagonActive,GeoJsonActive, toggleGeoJsonActive, testToggle, filesToggle, circleRadius, circleIconsNumber}) => {
+export const Sidebar = ({sliderValue, handleSliderChange, sliderCircleValue,handleSliderChangeCircle, radius, iconsNumber, fileLength, pointsActive, togglePointsActive, heatmapActive, toggleHeatmapActive, hexagonActive, toggleHexagonActive, testToggle, filesToggle, circleRadius, circleIconsNumber, fileMaxLength}) => {
     const [activeTab, setActiveTab] = 
         useState<number>(0);
     const handleTabClicked = (tab: number) => {
@@ -115,12 +115,6 @@ export const Sidebar = ({sliderValue, handleSliderChange, sliderCircleValue,hand
                     <div>
             <form>
       <div>
-      <Select options={options} onChange={testToggle}   styles={{control: (baseStyles, state) => ({
-      ...baseStyles,
-      borderColor: state.isFocused ? 'grey' : 'purple',
-    }),
-  }}/>
-
 <Select options={files} onChange={filesToggle}   styles={{control: (baseStyles, state) => ({
       ...baseStyles,
       borderColor: state.isFocused ? 'grey' : 'purple',
@@ -135,8 +129,8 @@ export const Sidebar = ({sliderValue, handleSliderChange, sliderCircleValue,hand
         onChange={handleSliderChange}
       />
       <div className="switch-label">Radius in km: {radius}</div>
-      <div className="switch-label">Number of bus stops: {iconsNumber}</div>
-      <div className="switch-label">Length of file: {fileLength}</div>
+      <div className="switch-label">Number of desired points: {iconsNumber}</div>
+      <div className="switch-label">Length of file: {fileMaxLength}</div>
 
       <input
         type="range"
@@ -147,9 +141,15 @@ export const Sidebar = ({sliderValue, handleSliderChange, sliderCircleValue,hand
         />
 
       <div className="switch-label">Radius in km: {circleRadius}</div>
-      <div className="switch-label">Number of bus stops: {circleIconsNumber}</div>
+      <div className="switch-label">Number of desired points: {circleIconsNumber}</div>
       <div className="switch-label">Length of file: {fileLength}</div>
       <div>
+
+      <Select options={options} onChange={testToggle}   styles={{control: (baseStyles, state) => ({
+      ...baseStyles,
+      borderColor: state.isFocused ? 'grey' : 'purple',
+        }),
+      }}/>
         <div className="row">
           <HStack>
             <Text className="switch-label">Points:</Text>
@@ -167,16 +167,6 @@ export const Sidebar = ({sliderValue, handleSliderChange, sliderCircleValue,hand
             <Text className="switch-label">Hexagons:</Text>
             <Switch isChecked={hexagonActive} onChange={toggleHexagonActive} />
           </HStack>
-        </div>
-        <div className="row">
-          <HStack>
-            <Text className="switch-label">GeoJson:</Text>
-            <Switch isChecked={GeoJsonActive} onChange={toggleGeoJsonActive} />
-          </HStack>
-        </div>
-        <input type="number" className="glow" id="unik" onChange={cc}></input>
-        <div className="glow" onClick={klikken}>
-          OK
         </div>
         <div className="containDropZone">
         <DropZone data={data} dispatch={dispatch} />

@@ -81,7 +81,8 @@ const Index = () => {
   const [sliderValue, setSliderValue] = useState(0);
   const [sliderCircleValue, setSliderCircleValue] = useState(0);
   const [mapboxStyle, setMapboxStyle] = useState("mapbox://styles/mapbox/dark-v10");
-  const [file, setFile] = useState(require("../../public/csvjson.json").slice(0,10000))
+  const [file, setFile] = useState(require("../../public/csvjson.json"))
+  const [fileMax, setFileMax] = useState(require("../../public/csvjson.json").slice(0,400))
   const[D, setD] = useState(file.slice(0,100))
   const[radius, setRadius] = useState(0);
   const[iconsNumber, setIconsNumber] = useState(0);
@@ -111,7 +112,14 @@ const Index = () => {
     }
     
   });
-
+  const testCircles = [circle([0,0], 3), circle([0,1], 4)]
+  var dummy = 1
+  for (let step = 0; step < 5; step++) {
+    
+    // Runs 5 times, with values of step 0 through 4.
+    testCircles.push(circle([0,dummy], dummy))
+    dummy+=1
+  }
   const [displayFile, setDisplayFile] = useState(file);
   const [initialLong, setInitialLong] = useState(10.64)
   const [initialLat, setInitialLat] = useState(63.4)
@@ -128,8 +136,28 @@ const Index = () => {
 }
 const filesToggle= (event) =>{
   setFile(event.value)
-  calculateDistances(file);
+  setFileMax(event.value.slice(0,1000))
+  calculateDistances(fileMax);
   file.forEach(element => {
+    if(element.lat) {
+    }
+    if(element.Lat) {
+      element.lat = element.Lat
+      element.lon = element.Lon
+    }
+    if(element.LATITUDE) {
+      element.lat = element.LATITUDE
+      element.lon = element.LONGITUDE
+    }
+
+    if(element.latitude) {
+      element.lat = element.latitude
+      element.lon = element.longitude
+    }
+    
+  });
+
+  fileMax.forEach(element => {
     if(element.lat) {
     }
     if(element.Lat) {
@@ -152,7 +180,7 @@ const filesToggle= (event) =>{
   //setInitialLat(file[0].lat)
   
 }
-const [circleCenter, setCirlceCenter] = useState([0,0]);
+const [circleCenter, setCircleCenter] = useState([0,0]);
 const [centerRadius, setCenterRadius] = useState(0)
 
 const circles = circle(circleCenter, centerRadius)
@@ -168,24 +196,23 @@ const onClick = () =>{
     console.log("CC funksjon")
     setVv(e.target.value)
   }
-  const klikken= () =>{
-    setFile(file.slice(0,vv))
-    calculateDistances(file);
-  }
 
 
 
 
   // This function will be called when the user moves the slider
   const handleSliderChange = (event) => {
-    console.log("HER ERROR")
     setSliderValue(event.target.value);
     setRadius(event.target.value);
-    setDisplayFile(file.filter(item => (item["closest"] > event.target.value)));
+    setDisplayFile(fileMax.filter(item => (item["closest"] > event.target.value)));
     setIconsNumber(displayFile.length);
     setMapState({latitude: event.target.value,
                   longitude: 10.61,
                   zoom: 8})
+    displayFile.forEach(element => {
+      testCircles.push(circle([element.lon, element.lat], event.target.value))
+    });
+    setCenterRadius(0);
   }
 
   const handleSliderChangeCircle = (event) => {
@@ -201,7 +228,7 @@ const onClick = () =>{
   const [heatmapActive, { toggle: toggleHeatmapActive }] = useBoolean(false);
   const [pointsActive, { toggle: togglePointsActive }] = useBoolean(true);
   const [hexagonActive, { toggle: toggleHexagonActive }] = useBoolean(false);
-  const [GeoJsonActive, { toggle: toggleGeoJsonActive }] = useBoolean(false);
+  const [GeoJsonActive, { toggle: toggleGeoJsonActive }] = useBoolean(true);
 
 
   
@@ -234,7 +261,7 @@ const onClick = () =>{
     }),
     getSize: () => 50,
     pickable: true,
-    onClick: event => {setDisplayFile(file.filter(item => (item["lat"] === event.object.lat))),setCirlceCenter([event.object.lon, event.object.lat]), setCenterRadius(1), calculateCircleDistances(file ,file.findIndex(item => item["lat"] ===event.object.lat))}
+    onClick: event => {setDisplayFile(file.filter(item => (item["lat"] === event.object.lat))),setCircleCenter([event.object.lon, event.object.lat]), setCenterRadius(1), calculateCircleDistances(file ,file.findIndex(item => item["lat"] ===event.object.lat))}
     //onClick: event => console.log(event.object.lat)
   });
 
@@ -282,7 +309,7 @@ const onClick = () =>{
         </DeckGL>
       </Box>
 
-      <Sidebar handleSliderChange={handleSliderChange} handleSliderChangeCircle={handleSliderChangeCircle} sliderValue={sliderValue} sliderCircleValue={sliderCircleValue} radius={radius} iconsNumber={iconsNumber} cc={cc} klikken={klikken} fileLength={file.length} pointsActive={pointsActive} togglePointsActive={togglePointsActive} heatmapActive={heatmapActive} toggleHeatmapActive={toggleHeatmapActive} hexagonActive={hexagonActive} toggleHexagonActive={toggleHexagonActive} GeoJsonActive={GeoJsonActive} toggleGeoJsonActive={toggleGeoJsonActive} testToggle={testToggle} filesToggle={filesToggle} circleIconsNumber={CircleIconsNumber} circleRadius={circleRadius}/>
+      <Sidebar handleSliderChange={handleSliderChange} handleSliderChangeCircle={handleSliderChangeCircle} sliderValue={sliderValue} sliderCircleValue={sliderCircleValue} radius={radius} iconsNumber={iconsNumber} fileLength={file.length} fileMaxLength={fileMax.length} pointsActive={pointsActive} togglePointsActive={togglePointsActive} heatmapActive={heatmapActive} toggleHeatmapActive={toggleHeatmapActive} hexagonActive={hexagonActive} toggleHexagonActive={toggleHexagonActive} testToggle={testToggle} filesToggle={filesToggle} circleIconsNumber={CircleIconsNumber} circleRadius={circleRadius}/>
     </>
   );
 };
